@@ -15,7 +15,7 @@
 				</div>
 
 				<!-- TASK LIST -->
-				<a ng-repeat="task in tasks | filter: searchTask | orderBy: 'datetime':true" ng-href="#/browse/{{task.$id}}">
+				<a ng-repeat="task in tasks | filter: {title: searchTask, status: '!cancelled'} | orderBy: 'datetime':true" ng-href="#/browse/{{task.$id}}">
 					<div class="list-group-item">
 						<div class="row-picture">
 							<img class="circle" ng-src="{{task.gravatar}}">
@@ -38,11 +38,8 @@
 		</div>
 
 		<div class="col-md-6">
-			<div ng-show="!listMode">
-				<img src="images/browse.jpg" class="img-responsive img-browse">
-			</div>
 
-			<div ng-show="true">
+			<div ng-show="!listmode">
 
 				<!-- HEADER -->
 				<div class="row">
@@ -69,10 +66,15 @@
 									<ul class="dropdown-menu">
 										<li><a href="" data-toggle="modal" data-target="#ediModal">EDIT TASK</a></li>
 										<li class="divider"></li>
-										<li><a href="" ng-click="">CANCEL TASK</a></li>
+										<li><a href="" ng-click="cancelTask(selectedTask.$id)">CANCEL TASK</a></li>
 									</ul>
 								</div>
 							</div>
+
+							<div ng-show="isOpen(selectedTask) && !isTaskCreator(selectedTask) && !alreadyOffered">
+								<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#offModal">Make an Offer</button>
+							</div>
+
 						</div>
 
 					</div>
@@ -93,6 +95,88 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- OFFERS -->
+				<div class="row">
+					<div class="col-md-12">
+						<div class="panel panel-default">
+
+							<div class="panel-heading">
+								<h3 class="panel-title">Offers</h3>
+							</div>
+
+							<div class="panel-body">
+								<div class="title" ng-hide="offers && offers.length > 0">
+									<span>No offer for this task yet</span>
+								</div>
+
+								<div class="row" ng-repeat="offer in offers">
+									<div class="col-md-10">
+										<button ng-show="offer.accepted" class="btn btn-success btn-xs disabled">Assigned</button>
+										<button ng-show="isTaskCreator(selectedTask) && isOpen(selectedTask)" class="btn btn-info btn-xs" ng-click="acceptOffer(offer.$id,offer.uid)">Accept - ${{offer.total}}</button> 
+										<button ng-show="isOfferMaker(offer) && isOpen(selectedTask)" class="btn btn-danger btn-xs" ng-click="cancelOffer(offer.$id)">Cancel my offer - ${{offer.total}}
+										</button>
+
+
+										<img ng-src="{{offer.gravatar}}" class="img-circle offer gravatar">
+										<span>{{offer.name}}</span>
+									</div>
+								</div><br>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- COMMENTS -->
+				<div class="row">
+					<div class="col-md-12">
+						<div class="pane panel-default">
+
+							<div class="panel-heading">
+								<h3 class="panel-title">Comments</h3>
+							</div>
+
+							<div class="panel-body">
+								<div class="title" ng-hide="comments && comments.length > 0">
+									<span>No comment about this task</span>
+								</div><br>
+
+								<div class="row" ng-repeat="com in comments">
+									<div class="col-md-1">
+										<img ng-src="{{com.gravatar}}" class="img-circle comment gravatar">
+									</div>
+									<div class="col-md-11">
+										<div class="well well-sm cmt">
+											<span class="cmt-title">{{com.name}}:</span>
+											<span class="cmt-time pull-right"><span am-time-ago="1421840540061"></span></span><br>
+
+											<span>{{com.content}}</span>
+										</div>
+									</div>
+								</div><br>
+
+								<div class="row" ng-show="isOpen(selectedTask)">
+									<div class="col-md-12">
+										<form ng-submit="addComment()">
+
+											<div class="input-group">
+												<div class="input-group-addon">
+													<img ng-src="{{user.profile.gravatar}}" class="img-circle comment gravatar">
+												</div>
+												<input type="text" ng-model="content" cols="10" rows="3" class="form-control" placeholder="Comment here..." required><br>
+											</div>
+
+											<span class="pull-right">
+												<input type="submit" class="btn btn-info" value="Comment">
+											</span>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 		</div>
 
@@ -101,3 +185,4 @@
 
 <!--INCLUDE ediMODAL so that it'll work... -->
 <div ng-include="'views/partials/edit.html'"></div>
+<div ng-include="'views/partials/offer.html'"></div>

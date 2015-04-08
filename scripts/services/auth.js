@@ -24,6 +24,9 @@ app.factory('Auth', function(FURL, $firebaseAuth, $firebase) {
 				{email: user.email, password: user.password}
 			);
 		},
+		getProfile: function(uid) {
+			return $firebase(ref.child('profile').child(uid)).$asObject();
+		},
 		register: function(user) {
 			return auth.$createUser({email: user.email, password: user.password})
 			.then(function() {
@@ -41,6 +44,9 @@ app.factory('Auth', function(FURL, $firebaseAuth, $firebase) {
 		},
 		signedIn: function() {
 			return !!Auth.user.provider;
+		},
+		requireAuth: function() {
+			return auth.$requireAuth();
 		}
 	};
 
